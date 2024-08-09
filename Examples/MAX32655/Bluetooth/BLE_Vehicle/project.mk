@@ -25,3 +25,6 @@ IPATH += services
 VPATH += services
 IPATH += profiles/bcv
 VPATH += profiles/bcv
+
+IPATH += vehicle
+VPATH += vehicle

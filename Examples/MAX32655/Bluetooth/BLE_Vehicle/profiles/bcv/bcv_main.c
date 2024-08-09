@@ -27,19 +27,35 @@
 #include "app_ui.h"
 #include "pal_led.h"
 #include "wsf_trace.h"
+#include "board.h"
+#include "pt.h"
+#include "vehicle.h"
 
 /**************************************************************************************************
   Macros
 **************************************************************************************************/
 
+/***** Definitions *****/
+#define ALL_PT 0x0C
+
+#define ContPulse_PT_L 2
+#define ContPulse_PT_R 3
+#define ContPulse_L_Pin 16
+#define ContPulse_R_Pin 17
+
+#define MXC_GPIO_PORT_OUT MXC_GPIO0
+#define MXC_GPIO_PIN_OUT MXC_GPIO_PIN_24
+
+#define MXC_GPIO_PORT_INTERRUPT_STATUS MXC_GPIO0
+#define MXC_GPIO_PIN_INTERRUPT_STATUS MXC_GPIO_PIN_25
+
+#define LED1_Pin 24
+#define LED2_Pin 25
 
 
 /**************************************************************************************************
   Local Variables
 **************************************************************************************************/
-
-
-
 
 
 /*************************************************************************************************/
@@ -63,40 +79,49 @@ uint8_t BcvWriteCback(dmConnId_t connId, uint16_t handle, uint8_t operation, uin
         if (on)
         {
             printf("on forward!\n");
+            forward();
         }
         else
         {
             printf("off forward!\n");
+            stop();
         }
         break;
     case BCV_DOWN_HDL:
         if (on)
         {
             printf("on backward!\n");
+            backward();
         }
         else
         {
             printf("off backward!\n");
+            stop();
         }
         break;
     case BCV_LEFT_HDL:
         if (on)
         {
             printf("on left!\n");
+            left();
+   
         }
         else
         {
             printf("off left!\n");
+            turn_back();
         }
         break;
     case BCV_RIGHT_HDL:
         if (on)
         {
             printf("on right!\n");
+            right();
         }
         else
         {
             printf("off right!\n");
+            turn_back();
         }
         break;
     case BCV_STOP_HDL:
@@ -137,16 +162,22 @@ void BcvSetFeatures(uint8_t features)
 /*!
  *  \brief  Initialize the bcv server.
  *
- *  \param  handerId    WSF handler ID of the application using this service.
- *  \param  pCfg        bcv configurable parameters.
- *
  *  \return None.
  */
 /*************************************************************************************************/
 void BcvInit(void)
 {
     /* De-init the PAL LEDs so we can control them here */
-    //PalLedDeInit();
-    APP_TRACE_INFO0("maybe later");
+    PalLedDeInit();
+    NVIC_EnableIRQ(PT_IRQn); //enabled default interrupt handler
+    MXC_PT_EnableStopInt(ALL_PT); //enabled interrupts for all PT
+    MXC_PT_Init(MXC_PT_CLK_DIV1); //initialize pulse trains
+
+    vehicle_init();
+}
+
+void PT_IRQHandler(void)
+{
+    MXC_PT_ClearStopFlags(ALL_PT);
 }
 
