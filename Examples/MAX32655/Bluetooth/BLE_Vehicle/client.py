@@ -10,7 +10,7 @@ import time
 # add function to auto-detect the vehicle address
 
 # which double click two times quickly, it will in press state at the end!!!!!!!
-#addressevkit = "00:18:80:03:AE:F6"
+
 #address = "00:18:80:EF:8E:90"
 address = "00:18:80:77:FF:0E"
 
