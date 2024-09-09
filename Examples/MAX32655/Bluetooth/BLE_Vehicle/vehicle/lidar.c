@@ -38,6 +38,7 @@
 #include "dma.h"
 #include "bcv_api.h"
 #include "pal_uart.h"
+#include "vehicle.h"
 
 /***** Definitions *****/
 #define UART_BAUD 115200
@@ -45,6 +46,7 @@
 #define LIDAR_UART MXC_UART3
 #define LIDAR_UART_IRQ UART3_IRQn
 #define TIMER_DELAY 100
+#define SATEFY_DISTANCE 40 // unit: cm
 
 /***** Globals *****/
 uint8_t RxData[BUFF_SIZE];
@@ -66,6 +68,10 @@ void readCallback(void)
     {
         volatile uint16_t distance_cm = 0;
         distance_cm = RxData[3] << 8 | RxData[2];
+        if (distance_cm < SATEFY_DISTANCE)
+        {
+            stopObstacle();
+        }
         BcvSendLid((uint8_t *) &distance_cm);
     }
 }

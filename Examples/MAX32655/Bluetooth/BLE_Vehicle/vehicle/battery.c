@@ -33,8 +33,9 @@
 #include "svc_ch.h"
 #include "svc_batt.h"
 #include "app_api.h"
+#include "vehicle.h"
 
-#define BAT_PERIOD 10000
+#define BAT_PERIOD 100
 #define FULL_12V 0x30C
 #define EMPTY_5V 0x144
 
@@ -45,19 +46,21 @@ wsfTimer_t batTimer;
 
 void batTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 {
-    adc_val = MXC_ADC_StartConversion(MXC_ADC_CH_0);
-    overflow = (adc_val == E_OVERFLOW ? 1 : 0);
+    if (getVehicleStatus() == STOP)
+    {
+        adc_val = MXC_ADC_StartConversion(MXC_ADC_CH_0);
+        overflow = (adc_val == E_OVERFLOW ? 1 : 0);
+        // Calculate the battery level precent
+        int32_t temp = (adc_val - EMPTY_5V)  > 0 ? ((adc_val - EMPTY_5V) * 100) : 0;
+        uint8_t level = temp / (FULL_12V - EMPTY_5V);
+        if (level > 100) level = 100;
 
-    // Calculate the battery level precent
-    uint8_t level = (adc_val - EMPTY_5V) * 100 / (FULL_12V - EMPTY_5V);
-    if (level > 100) level = 100;
-
-    // Send notification
-    dmConnId_t connId = AppConnIsOpen(); /*Getting connected */
-    if (connId != DM_CONN_ID_NONE) {
-        AttsHandleValueNtf(connId, BATT_LVL_HDL, 1, &level);
+        // Send notification
+        dmConnId_t connId = AppConnIsOpen(); /*Getting connected */
+        if (connId != DM_CONN_ID_NONE) {
+            AttsHandleValueNtf(connId, BATT_LVL_HDL, 1, &level);
+        }
     }
-
     WsfTimerStartMs(&batTimer, BAT_PERIOD);
 }
 

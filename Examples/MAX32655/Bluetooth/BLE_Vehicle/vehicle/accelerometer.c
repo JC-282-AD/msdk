@@ -31,6 +31,7 @@
 #include "accelerometer.h"
 #include "bcv_api.h"
 #include "arm_math.h"
+#include "vehicle.h"
 
 
 #define I2C_MASTER MXC_I2C2 ///< I2C instance
@@ -72,6 +73,20 @@ float32_t state_z[NUM_TAPS + BLOCK_SIZE - 1];
 arm_fir_instance_f32 fx;
 arm_fir_instance_f32 fy;
 arm_fir_instance_f32 fz;
+
+float32_t desired_speed = 0; // Target motor speed in RPM
+float32_t actual_speed = 0.0f;     // Current motor speed in RPM
+float32_t control_signal = 0.0f;   // Output from PID controller (PWM duty cycle)
+
+
+// PID parameters
+float32_t Kp = 0.6f;
+float32_t Ki = 0.01f;
+float32_t Kd = 0.5f;
+
+// PID controller instance
+arm_pid_instance_f32 PID;
+
 
 static void initFilter(void) {
     // Initialize the FIR filter
@@ -139,6 +154,7 @@ void AccTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
         axis_data[0], axis_data[1], axis_data[2],
         (int16_t) (speedX * 100), (int16_t) (speedY * 100)
     };
+    printf("%2.2f   %2.2f   \n",speedX, speedY);
     BcvSendAcc((uint8_t*) toSend);
     WsfTimerStartMs(&accTimer, ACC_PERIOD);
 }
@@ -158,8 +174,18 @@ void CalTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 
     speedX += accX * CAL_PERIOD / 1000;
     speedY += accY * CAL_PERIOD / 1000;
+    if (getVehicleStatus() == STOP || getVehicleDirection() != STRAIGHT)
+    {
+        arm_pid_init_f32(&PID, 1);
+    }
+    else
+    {
+        actual_speed = speedY * 100;
+        float32_t error = actual_speed - desired_speed;
+        control_signal = arm_pid_f32(&PID, error);
+        setWheelDiff((int16_t) control_signal);
+    }
 
-    
 
     WsfTimerStartMs(&calTimer, CAL_PERIOD);
 }
@@ -222,7 +248,11 @@ void AccInit(void)
         printf("Trouble configuring ADXL343.\n");
     }
 
-
+    
+    PID.Kp = Kp;
+    PID.Ki = Ki;
+    PID.Kd = Kd;
+    arm_pid_init_f32(&PID, 1);  // Reset the PID controller's state
 
     // Initialize the DSP filter
     initFilter();

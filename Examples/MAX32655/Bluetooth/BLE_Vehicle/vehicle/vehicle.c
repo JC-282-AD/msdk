@@ -39,10 +39,19 @@
 #define ContPulse_L_Pin 16
 #define ContPulse_R_Pin 17
 #define SPEED_CHANGE_RATE 100 // (ms)
-#define SPEED_CHANGE_VALUE 5
-#define TURN_SPEED_DIFFERENCE 5
+#define SPEED_CHANGE_VALUE 3
+#define TURN_SPEED_PLUS 3
+#define TURN_SPEED_DIFFERENCE 8
 #define MIN_DUTY_CYCLE 30 // (%)
-#define MAX_DUTY_CYCLE 80 // (%)
+#define MAX_DUTY_CYCLE 65 // (%)
+
+// This is the variable for unbalanced vehicle
+// If the vehicle is super balanced and it won't naturally turn left or right
+// This macro can be set to zero
+// positive value for naturally turn left vehicle
+// negative value for naturally turn right vehicle
+// This value will be combined with duty cycle to balance the vehicle
+#define VEHICLE_CAB (-1)
 
 #define PWM_CLOCK_SOURCE MXC_TMR_APB_CLK 
 #define FREQ 4000 // (Hz)
@@ -130,6 +139,9 @@ MyVehicle vehicle = {
 wsfHandlerId_t spdTimerHandlerId;
 wsfTimer_t spdTimer;
 
+// variable for PID wheel diff
+int16_t wheelDiff = -1;
+
 void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 {
     if (vehicle.status == ACC)
@@ -158,17 +170,17 @@ void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
     unsigned int dutyTicksR;
     if (vehicle.direction == LEFT)
     {
-        dutyTicksL = periodTicksL * (vehicle.dutyCycle - TURN_SPEED_DIFFERENCE) / 100;
-        dutyTicksR = periodTicksR * vehicle.dutyCycle / 100;
+        dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff - TURN_SPEED_DIFFERENCE) / 100;
+        dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff) / 100;
     }
     else if (vehicle.direction == RIGHT)
     {
-        dutyTicksL = periodTicksL * vehicle.dutyCycle / 100;
-        dutyTicksR = periodTicksR * (vehicle.dutyCycle - TURN_SPEED_DIFFERENCE) / 100;
+        dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
+        dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff - TURN_SPEED_DIFFERENCE) / 100;
     }
     else{
-        dutyTicksL = periodTicksL * vehicle.dutyCycle / 100;
-        dutyTicksR = periodTicksR * vehicle.dutyCycle / 100;
+        dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
+        dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff) / 100;
     }
     
     MXC_TMR_SetPWM(PWM_TIMER_LEFT, dutyTicksL);
@@ -185,8 +197,8 @@ static void PWMTimer(void)
     mxc_tmr_cfg_t tmrR; // to configure timer
     unsigned int periodTicksL = MXC_TMR_GetPeriod(PWM_TIMER_LEFT, PWM_CLOCK_SOURCE, 16, FREQ);
     unsigned int periodTicksR = MXC_TMR_GetPeriod(PWM_TIMER_RIGHT, PWM_CLOCK_SOURCE, 16, FREQ);
-    unsigned int dutyTicksL = periodTicksL * vehicle.dutyCycle / 100;
-    unsigned int dutyTicksR = periodTicksR * vehicle.dutyCycle / 100;
+    unsigned int dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
+    unsigned int dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff) / 100;
 
     MXC_TMR_Shutdown(PWM_TIMER_LEFT);
     MXC_TMR_Shutdown(PWM_TIMER_RIGHT);
@@ -285,3 +297,26 @@ void backward(void)
     MXC_GPIO_OutSet(right1.port, right1.mask);
     MXC_GPIO_OutClr(right2.port, right2.mask);
 }
+
+void stopObstacle(void)
+{
+    MXC_GPIO_OutClr(left2.port, left2.mask);
+    MXC_GPIO_OutClr(right2.port, right2.mask);
+}
+
+int getVehicleStatus(void)
+{
+    return vehicle.status;
+}
+
+int getVehicleDirection(void)
+{
+    return vehicle.direction;
+}
+
+void setWheelDiff(int16_t PID_control)
+{
+    wheelDiff = PID_control;
+}
+
+

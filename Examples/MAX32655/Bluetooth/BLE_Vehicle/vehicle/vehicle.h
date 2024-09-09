@@ -37,7 +37,7 @@ typedef enum direction {
 
 typedef struct myVehicle
 {
-    uint8_t dutyCycle;
+    int16_t dutyCycle;
     Status status;
     Direction direction;
 
@@ -114,3 +114,40 @@ void stop(void);
  */
 /*************************************************************************************************/
 void slow(void);
+
+/*************************************************************************************************/
+/*!
+ *  \brief  lock the vehicle to make vehicle stop moving forward. It can still go backward
+ *
+ *  \return None.
+ */
+/*************************************************************************************************/
+void stopObstacle(void);
+
+/*************************************************************************************************/
+/*!
+ *  \brief  get the vehicle moving status (ACC, SLOW, STOP)
+ *
+ *  \return The status of the vechicle, enum type.
+ */
+/*************************************************************************************************/
+int getVehicleStatus(void);
+
+/*************************************************************************************************/
+/*!
+ *  \brief  get the vehicle moving direction (LEFT, RIGHT, STRAIGHT)
+ *
+ *  \return The status of the vechicle, enum type.
+ */
+/*************************************************************************************************/
+int getVehicleDirection(void);
+
+
+/*************************************************************************************************/
+/*!
+ *  \brief  get the vehicle moving status (ACC, SLOW, STOP)
+ *
+ *  \return The status of the vechicle, enum type.
+ */
+/*************************************************************************************************/
+void setWheelDiff(int16_t);
