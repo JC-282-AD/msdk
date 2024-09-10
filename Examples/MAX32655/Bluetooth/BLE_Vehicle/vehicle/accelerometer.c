@@ -80,9 +80,9 @@ float32_t control_signal = 0.0f;   // Output from PID controller (PWM duty cycle
 
 
 // PID parameters
-float32_t Kp = 0.6f;
-float32_t Ki = 0.01f;
-float32_t Kd = 0.5f;
+float32_t Kp = 0.7f;
+float32_t Ki = 0.1f;
+float32_t Kd = 5.0f;
 
 // PID controller instance
 arm_pid_instance_f32 PID;
@@ -180,7 +180,7 @@ void CalTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
     }
     else
     {
-        actual_speed = speedY * 100;
+        actual_speed = accY;
         float32_t error = actual_speed - desired_speed;
         control_signal = arm_pid_f32(&PID, error);
         setWheelDiff((int16_t) control_signal);
