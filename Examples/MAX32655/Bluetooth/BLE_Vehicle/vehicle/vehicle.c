@@ -62,10 +62,10 @@
 
 #define IN_MOTOR_LEFT_PORT MXC_GPIO1
 #define IN_MOTOR_RIGHT_PORT MXC_GPIO1
-#define IN_MOTOR_LEFT1_PIN MXC_GPIO_PIN_6
-#define IN_MOTOR_LEFT2_PIN MXC_GPIO_PIN_7
-#define IN_MOTOR_RIGHT1_PIN MXC_GPIO_PIN_8
-#define IN_MOTOR_RIGHT2_PIN MXC_GPIO_PIN_9
+#define IN_MOTOR_RIGHT1_PIN MXC_GPIO_PIN_6
+#define IN_MOTOR_RIGHT2_PIN MXC_GPIO_PIN_7
+#define IN_MOTOR_LEFT1_PIN MXC_GPIO_PIN_8
+#define IN_MOTOR_LEFT2_PIN MXC_GPIO_PIN_9
 
 #define EN_MOTOR_LEFT_PORT MXC_GPIO0
 #define EN_MOTOR_LEFT_PIN MXC_GPIO_PIN_20
@@ -144,26 +144,7 @@ int16_t wheelDiff = -1;
 
 void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 {
-    if (vehicle.status == ACC)
-    {
-        if (vehicle.dutyCycle < MAX_DUTY_CYCLE)
-        {
-            vehicle.dutyCycle += SPEED_CHANGE_VALUE;
-        }
-        
-    }
-    else if (vehicle.status == SLOW)
-    {
-        vehicle.dutyCycle -= SPEED_CHANGE_VALUE;
-    }
-    else{
-        vehicle.dutyCycle = MIN_DUTY_CYCLE;
-    }
-    if (vehicle.dutyCycle <= MIN_DUTY_CYCLE)
-    {
-        stop();
-    }
-    
+
     unsigned int periodTicksL = MXC_TMR_GetPeriod(PWM_TIMER_LEFT, PWM_CLOCK_SOURCE, 16, FREQ);
     unsigned int periodTicksR = MXC_TMR_GetPeriod(PWM_TIMER_RIGHT, PWM_CLOCK_SOURCE, 16, FREQ);
     unsigned int dutyTicksL;
@@ -178,13 +159,33 @@ void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
         dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
         dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff - TURN_SPEED_DIFFERENCE) / 100;
     }
-    else{
-        dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
-        dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff) / 100;
+    else
+    {
+        if ((vehicle.status == ACC))
+        {
+            if (vehicle.dutyCycle < MAX_DUTY_CYCLE)
+            {
+                vehicle.dutyCycle += SPEED_CHANGE_VALUE;
+            }
+        }
+        else if ((vehicle.status == SLOW))
+        {
+            vehicle.dutyCycle -= SPEED_CHANGE_VALUE;
+        }
+        else
+        {
+            vehicle.dutyCycle = MIN_DUTY_CYCLE;
+        }
+            dutyTicksL = periodTicksL * (vehicle.dutyCycle + wheelDiff) / 100;
+            dutyTicksR = periodTicksR * (vehicle.dutyCycle - wheelDiff) / 100;
     }
     
     MXC_TMR_SetPWM(PWM_TIMER_LEFT, dutyTicksL);
     MXC_TMR_SetPWM(PWM_TIMER_RIGHT, dutyTicksR);
+    if (vehicle.dutyCycle <= MIN_DUTY_CYCLE)
+    {
+        stop();
+    }
 
     WsfTimerStartMs(&spdTimer, SPEED_CHANGE_RATE);
 }

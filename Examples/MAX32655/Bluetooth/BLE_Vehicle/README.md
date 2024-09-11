@@ -2,11 +2,15 @@
 
 Bluetooth Controlled Vehicle. This example is based on the MAX32655FTHR. 
 
-There are several functionalities is supported by this example: 
+There are several functionalities supported by this example: 
 
 1. Accelerometer is used to detect the G value and calculate the speed. 
 
 2. Lidar is used to sense the distance between vehicle and the obstacle in front of it. 
+
+3. Motor driver is used to control the vehicle. 
+
+4. ADC is applied to detect the battery level for the vehicle. 
 
 ## Hardware Component:
 ### ADXL343
@@ -20,14 +24,10 @@ It supports both I²C and SPI communication interfaces. I²C communication inter
 The acceleration will be detected by using this accelerometer, and the speed will be calculated by using the results from accelerometer. 
 
 
-#### Connection:
-
-
 ### Lidar TFmini Plus
 
 The is the Lidar used in this project to detect the distance from obstacle ahead. **[TFMiniPlus User Manual](https://www.analog.com/media/en/technical-documentation/data-sheets/adxl343.pdf)** can be found here. It uses UART protocal. 
-
-#### Connection:
+The default of this LiDar setting will send 100 data frames per second. The setting in this project will only send the data frame back when receiving a request. 
 
 
 ### L298N Motor Driver
@@ -57,17 +57,27 @@ The L298N motor driver is a dual H-bridge motor driver integrated circuit (IC) u
 | IN3                           | Input to control Motor B      |
 | IN4                           | Input to control Motor B      |
 
+### TXS0108 Level Shifter
 
-## Software
+**Voltage Translation:** Converts signals between 1.2V to 3.6V on the A-side and 1.65V to 5.5V on the B-side. Common use cases are 3.3V -> 5V or 1.8V -> 3.3V.
 
-### Project Usage
+In this project, since the L298N only accepts 5V signal input and ME17 only gives 3.3V signal output, this level shifter is used to convert the voltage from 3.3V to 5V. 
 
-Universal instructions on building, flashing, and debugging this project can be found in the **[MSDK User Guide](https://analogdevicesinc.github.io/msdk/USERGUIDE/)**.
+## Required Connections
 
-### Required Connections
+This project uses ME17FTHR board. 
 
-If using the Standard EV Kit board (EvKit\_V1):
--   Connect a USB cable between the PC and the CN2 (USB/PWR - UART) connector.
--   Close jumpers JP7 (RX_EN) and JP8 (TX_EN).
--   Close jumpers JP5 (LED1 EN) and JP6 (LED2 EN).
+- Connect P2_6 (LPUART RX) and P2_7 (LPUART TX) with corresponding TX and RX on LiDar. 
+- Connect P2_0 (Analog Input) with the VDD of the battery pack. 
+- Connect P0_30 (SCL) and P0_31 (SDA) with corresponding SCL and SDA pins on ADXL343 Accelerometer. 
+
+
+**Put the level shifter between for the following conenctions**
+- Connect P1_6 and P1_7 (two GPIOs) with two inputs of right motor control signal. 
+- Connect P1_8 and P1_9 (two GPIOs) with two inputs of left motor control signal. 
+- Connect P0_24 (PWM) with ENA pin for right motor on motor driver.
+- Connect P0_20 (PWM) with ENA pin for left motor on motor driver.
+
+
+
 

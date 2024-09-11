@@ -1,5 +1,5 @@
 import asyncio
-from bleak import BleakClient
+from bleak import BleakScanner, BleakClient
 from pynput import keyboard
 from dashboard import VehicleDashboard
 import pygame
@@ -7,12 +7,7 @@ import struct
 import math
 import time
 
-# add function to auto-detect the vehicle address
-
 # which double click two times quickly, it will in press state at the end!!!!!!!
-
-#address = "00:18:80:EF:8E:90"
-address = "00:18:80:77:FF:0E"
 
 up_uuid = "85fc567f-31d9-4185-87c6-339924d1c5be"
 down_uuid = "85fc5680-31d9-4185-87c6-339924d1c5be"
@@ -70,15 +65,6 @@ def lid_handler(sender, data):
 def bat_handler(sender, data):
     dashboard.batt = int.from_bytes(data, byteorder='big')
     dashboard.draw_dashboard()
-
-
-async def discover_services():
-    async with BleakClient(address) as client:
-        services = await client.get_services()
-        for service in services:
-            print(f"Service: {service.uuid}")
-            for characteristic in service.characteristics:
-                print(f"  Characteristic: {characteristic.uuid} | Properties: {characteristic.properties}")
 
 
 async def on(client, uuid):
@@ -152,6 +138,13 @@ class KeyHandler:
             pass  # Ignore special keys
 
 async def main():
+    devices = await BleakScanner.discover()
+    address = None
+    for i, device in enumerate(devices):
+        if (device.name == "VEHICLE"):
+            print(f"FOUND: {device.name} - {device.address}")
+            address = device.address
+    
     dashboard.initialize()
     pygame.event.get()
     async with BleakClient(address) as client:

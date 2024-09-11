@@ -80,7 +80,7 @@ float32_t control_signal = 0.0f;   // Output from PID controller (PWM duty cycle
 
 
 // PID parameters
-float32_t Kp = 0.7f;
+float32_t Kp = 0.2f;
 float32_t Ki = 0.1f;
 float32_t Kd = 5.0f;
 
