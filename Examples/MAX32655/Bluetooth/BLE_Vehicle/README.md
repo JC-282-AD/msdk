@@ -72,12 +72,29 @@ This project uses ME17FTHR board.
 - Connect P0_30 (SCL) and P0_31 (SDA) with corresponding SCL and SDA pins on ADXL343 Accelerometer. 
 
 
+
 **Put the level shifter between for the following conenctions**
 - Connect P1_6 and P1_7 (two GPIOs) with two inputs of right motor control signal. 
 - Connect P1_8 and P1_9 (two GPIOs) with two inputs of left motor control signal. 
 - Connect P0_24 (PWM) with ENA pin for right motor on motor driver.
 - Connect P0_20 (PWM) with ENA pin for left motor on motor driver.
 
+## Software:
+
+There are two python files in client_script folder: `client.py` and `dashboard.py`. 
+You should run `client.py` on PC to get connected with ME17 through Bluetooth. `dashboard.py` will be used by `client.py` to draw the dashboard for the vehicle. 
+
+### CMSIS - DSP
+
+There are two functions is used from CMSIS - DSP library in this project: FIR filter and PID motor control. 
+
+#### PID motor control:
+
+The PID motor control is used to make users better control the vehicle. 
+
+#### FIR filter:
+
+The FIR filter is used to filter the data derived from the accelerometer. 
 
 
 

@@ -154,7 +154,6 @@ void AccTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
         axis_data[0], axis_data[1], axis_data[2],
         (int16_t) (speedX * 100), (int16_t) (speedY * 100)
     };
-    printf("%2.2f   %2.2f   \n",speedX, speedY);
     BcvSendAcc((uint8_t*) toSend);
     WsfTimerStartMs(&accTimer, ACC_PERIOD);
 }
@@ -169,8 +168,7 @@ void CalTimerHandler(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 
     float accX = (float) ( ((axis_data[0] - initAngleX * axis_data[2]) * ADXL343_SF_2G * ACC_G)) - initAccX;
     float accY = (float) ( ((axis_data[1] - initAngleY * axis_data[2]) * ADXL343_SF_2G * ACC_G)) - initAccY;
-    //float rounded_accX = ((int) (accX * 10)) / 10.0f;
-    //float rounded_accY = ((int) (accY * 10)) / 10.0f;
+
 
     speedX += accX * CAL_PERIOD / 1000;
     speedY += accY * CAL_PERIOD / 1000;

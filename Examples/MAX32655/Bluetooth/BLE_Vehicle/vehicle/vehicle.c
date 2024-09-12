@@ -39,11 +39,11 @@
 #define ContPulse_L_Pin 16
 #define ContPulse_R_Pin 17
 #define SPEED_CHANGE_RATE 100 // (ms)
-#define SPEED_CHANGE_VALUE 3
+#define SPEED_CHANGE_VALUE 2
 #define TURN_SPEED_PLUS 3
 #define TURN_SPEED_DIFFERENCE 8
 #define MIN_DUTY_CYCLE 30 // (%)
-#define MAX_DUTY_CYCLE 65 // (%)
+#define MAX_DUTY_CYCLE 64 // (%)
 
 // This is the variable for unbalanced vehicle
 // If the vehicle is super balanced and it won't naturally turn left or right
@@ -317,7 +317,7 @@ int getVehicleDirection(void)
 
 void setWheelDiff(int16_t PID_control)
 {
-    wheelDiff = PID_control;
+    //wheelDiff = PID_control;
 }
 
 
