@@ -35,12 +35,18 @@ typedef enum direction {
     RIGHT
 } Direction;
 
+typedef enum movement {
+    NEUTRAL,
+    FORWARD,
+    BACKWARD
+} Movement;
+
 typedef struct myVehicle
 {
     int16_t dutyCycle;
     Status status;
     Direction direction;
-
+    Movement movement;
 } MyVehicle;
 
 /*************************************************************************************************/

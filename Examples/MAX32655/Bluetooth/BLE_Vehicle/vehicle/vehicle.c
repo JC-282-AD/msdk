@@ -138,13 +138,25 @@ MyVehicle vehicle = {
 
 wsfHandlerId_t spdTimerHandlerId;
 wsfTimer_t spdTimer;
-
-// variable for PID wheel diff
 int16_t wheelDiff = -1;
+
 
 void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 {
+    /*
+    // variable for PID wheel diff
+    int16_t wheelDiff = 0;
 
+    if (vehicle.movement == FORWARD)
+    {
+        wheelDiff = -1;
+    }
+
+    if (vehicle.movement == BACKWARD)
+    {
+        wheelDiff = +1;
+    }
+*/
     unsigned int periodTicksL = MXC_TMR_GetPeriod(PWM_TIMER_LEFT, PWM_CLOCK_SOURCE, 16, FREQ);
     unsigned int periodTicksR = MXC_TMR_GetPeriod(PWM_TIMER_RIGHT, PWM_CLOCK_SOURCE, 16, FREQ);
     unsigned int dutyTicksL;
@@ -193,6 +205,20 @@ void spdTimerHandlerCB(wsfEventMask_t event, wsfMsgHdr_t *pMsg)
 /*************************************************************************************************/
 static void PWMTimer(void)
 {
+    /*
+        // variable for PID wheel diff
+    int16_t wheelDiff = 0;
+
+    if (vehicle.movement == FORWARD)
+    {
+        wheelDiff = -1;
+    }
+
+    if (vehicle.movement == BACKWARD)
+    {
+        wheelDiff = +1;
+    }
+*/
     // Declare variables
     mxc_tmr_cfg_t tmrL; // to configure timer
     mxc_tmr_cfg_t tmrR; // to configure timer
@@ -272,6 +298,7 @@ void stop(void)
     vehicle.status = STOP;
     vehicle.dutyCycle = MIN_DUTY_CYCLE;
     vehicle.direction = STRAIGHT;
+    vehicle.movement = NEUTRAL;
     CaliAcc();
     MXC_GPIO_OutClr(left1.port, left1.mask);
     MXC_GPIO_OutClr(left2.port, left2.mask);
@@ -283,6 +310,7 @@ void stop(void)
 void forward(void)
 {
     vehicle.status = ACC;
+    vehicle.movement = FORWARD;
     MXC_GPIO_OutClr(left1.port, left1.mask);
     MXC_GPIO_OutSet(left2.port, left2.mask);
     MXC_GPIO_OutClr(right1.port, right1.mask);
@@ -293,6 +321,7 @@ void forward(void)
 void backward(void)
 {
     vehicle.status = ACC;
+    vehicle.movement = BACKWARD;
     MXC_GPIO_OutSet(left1.port, left1.mask);
     MXC_GPIO_OutClr(left2.port, left2.mask);
     MXC_GPIO_OutSet(right1.port, right1.mask);

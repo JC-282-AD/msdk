@@ -14,7 +14,7 @@ class VehicleDashboard(QWidget):
         font = QFont("Arial", 14)
 
         # Speed
-        self.speed_label = QLabel("Speed (km/h):")
+        self.speed_label = QLabel("Speed (cm/s):")
         self.speed_label.setFont(font)
         self.speed_display = QLCDNumber()
         self.speed_display.setSegmentStyle(QLCDNumber.Flat)
@@ -39,8 +39,8 @@ class VehicleDashboard(QWidget):
         accel_layout.addWidget(self.accx_label)
         accel_layout.addWidget(self.accx_display)
 
-        # Z-Axis Acceleration
-        self.accy_label = QLabel("Z-Axis:")
+        # Y-Axis Acceleration
+        self.accy_label = QLabel("Y-Axis:")
         self.accy_label.setFont(font)
         self.accy_display = QLCDNumber()
         self.accy_display.setSegmentStyle(QLCDNumber.Flat)
@@ -74,7 +74,7 @@ class VehicleDashboard(QWidget):
         layout.addWidget(self.battery_progress)
 
         # Distance
-        self.distance_label = QLabel("Distance (km):")
+        self.distance_label = QLabel("Distance (m):")
         self.distance_label.setFont(font)
         self.distance_display = QLCDNumber()
         self.distance_display.setSegmentStyle(QLCDNumber.Flat)
@@ -96,7 +96,7 @@ class VehicleDashboard(QWidget):
         self.speed = 0
         self.accx = 0
         self.accy = 0
-        self.battery_level = 0
+        self.batt = 0
         self.distance = 0
 
     def update_data(self):
@@ -105,7 +105,7 @@ class VehicleDashboard(QWidget):
         self.speed_display.display(self.speed)
         self.accx_display.display(round(self.accx, 2))
         self.accy_display.display(round(self.accy, 2))
-        self.battery_progress.setValue(self.battery_level)
+        self.battery_progress.setValue(self.batt)
         self.distance_display.display(round(self.distance, 1))
 
 # Application setup
