@@ -144,7 +144,9 @@ async def main():
         if (device.name == "VEHICLE"):
             print(f"FOUND: {device.name} - {device.address}")
             address = device.address
-    
+    if address is None:
+        print("Vehicle not found.")
+        return
     dashboard.initialize()
     pygame.event.get()
     async with BleakClient(address) as client:
@@ -190,4 +192,3 @@ except Exception as e:
 finally:
     loop.run_until_complete(loop.shutdown_asyncgens())
     loop.close()
-
